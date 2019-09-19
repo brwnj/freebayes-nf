@@ -43,3 +43,8 @@ nextflow brwnj/freebayes-nf -latest -resume -profile docker \
     + Arguments to be passed to freebayes command in addition to those already supplied like `--bam`, `--region`, and `--fasta-reference`.
     + Single quote these when specifying on the command line, e.g. --options '--pooled-discrete'.
     + Default: '--pooled-continuous --pooled-discrete --genotype-qualities --report-genotype-likelihood-max --allele-balance-priors-off --min-alternate-fraction 0.03 --min-repeat-entropy 1 --min-alternate-count 2'
++ `--intervals`
+    + Picard-style intervals file to use rather than intervals defined in .fai.
+    + Something like Broad's interval lists work here if you want to omit masked regions.
+        + See: https://software.broadinstitute.org/gatk/download/bundle
+        + And use the wgs_calling_regions file for your genome build.

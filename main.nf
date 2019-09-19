@@ -27,6 +27,9 @@ if (params.help) {
                    to those already supplied like `--bam`, `--region`, and
                    `--fasta-reference`. Single quote these when specifying
                    on the command line, e.g. --options '--pooled-discrete'.
+    --intervals    Picard-style intervals file to use rather than intervals
+                   defined in .fai. Something like Broad's interval lists
+                   work here if you want to omit masked regions.
 
     -----------------------------------------------------------------------
     """.stripIndent()
