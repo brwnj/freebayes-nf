@@ -47,7 +47,7 @@ params.intervals = false
 if( params.intervals ){
     intervals = file(params.intervals)
 }
-params.width = 100000
+params.width = 1000000
 params.outdir = './results'
 params.project = 'variants'
 
