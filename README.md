@@ -16,7 +16,7 @@ The resultants VCFs are merged and the final VCF is decomposed and normalized us
 In practice this looks like:
 
 ```
-nextflow brwnj/freebayes-nf -latest -resume -profile docker \
+nextflow run brwnj/freebayes-nf -latest -resume -profile docker \
     --alignments '*.cram' \
     --fasta human.fasta
 ```
