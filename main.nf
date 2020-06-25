@@ -30,6 +30,8 @@ if (params.help) {
     --intervals    Picard-style intervals file to use rather than intervals
                    defined in .fai. Something like Broad's interval lists
                    work here if you want to omit masked regions.
+    --exclude      Chromosome patterns to omit from variant calling.
+                   Default: 'decoy,random,Un,alt,EBV,M,HLA,phi'
 
     -----------------------------------------------------------------------
     """.stripIndent()
@@ -47,9 +49,10 @@ params.intervals = false
 if( params.intervals ){
     intervals = file(params.intervals)
 }
-params.width = 1000000
-params.outdir = './results'
-params.project = 'variants'
+exclude = params.exclude.tokenize(',')
+exclude = exclude
+    .collect {"$it"}
+    .join("|")
 
 // files
 fasta = file(params.fasta)
@@ -58,6 +61,13 @@ faidx = file("${params.fasta}.fai")
 intervals_ch = Channel
     .from(params.intervals ? intervals : faidx)
     .splitCsv(sep: '\t')
+    .filter { row ->
+        if (row[0] =~ /(${exclude})/) {
+            // println("Excluding ${row[0]}")
+        } else {
+            row
+        }
+    }
     .map { row ->
         // rows of interval lists
         if (row[0][0] != "@") {
@@ -87,7 +97,6 @@ intervals_ch = Channel
             }
         }
     }
-
 
 Channel
     .fromPath(params.alignments, checkIfExists: true)
