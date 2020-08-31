@@ -120,7 +120,8 @@ process run_freebayes {
 
     output:
     // need to rename due to colon in intervals
-    file("${params.project}_${interval.replaceAll(~/\:|\-|\*/, "_")}.vcf.gz") into vcf_ch
+    file("${params.project}_${interval.replaceAll(~/\:|\-|\*/, "_")}.vcf.gz") into (vcf_ch, makelist_ch)
+    file("${params.project}_${interval.replaceAll(~/\:|\-|\*/, "_")}.vcf.gz.csi") into vcfidx_ch
 
     script:
     """
@@ -130,16 +131,31 @@ process run_freebayes {
         --region ${interval} \
         ${aln.collect { "--bam $it" }.join(" ")} \
         | bgzip -c > ${params.project}_${interval.replaceAll(~/\:|\-|\*/, "_")}.vcf.gz
+    bcftools index ${params.project}_${interval.replaceAll(~/\:|\-|\*/, "_")}.vcf.gz
     """
 }
+
+process make_vcf_list {
+    input:
+    file(vcf) from makelist_ch.collect()
+
+    output:
+    file("vcfs.txt") into vcftxt_ch
+
+    script:
+    template 'makelist.py'
+}
+
 
 process merge_vcfs {
     publishDir path: "${params.outdir}/freebayes"
 
     input:
     file(vcf) from vcf_ch.collect()
+    file(vcfidx) from vcfidx_ch.collect()
     file(fasta)
     file(faidx)
+    file(vcftxt) from vcftxt_ch
 
     output:
     file("${params.project}.vcf.gz")
@@ -147,7 +163,7 @@ process merge_vcfs {
 
     script:
     """
-    gunzip -cd $vcf | vcffirstheader | bgzip -c > ${params.project}_dirty.vcf.gz
+    bcftools merge -m all --force-samples -l $vcftxt --threads 2 -O z -o ${params.project}_dirty.vcf.gz
     gsort ${params.project}_dirty.vcf.gz $faidx | vcfuniq \
         | bgzip -c > ${params.project}_dirty_sorted.vcf.gz
     bcftools norm -c all -f $fasta --multiallelics - --threads ${task.cpus} \
