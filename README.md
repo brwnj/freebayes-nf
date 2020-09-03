@@ -38,7 +38,7 @@ nextflow run brwnj/freebayes-nf -latest -resume -profile docker \
     + Default: 'variants'
 + `--width`
     + The genomic window size per variant calling job.
-    + Default: 100000
+    + Default: 1000000
 + `--options`
     + Arguments to be passed to freebayes command in addition to those already supplied like `--bam`, `--region`, and `--fasta-reference`.
     + Single quote these when specifying on the command line, e.g. --options '--pooled-discrete'.

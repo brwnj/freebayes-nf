@@ -22,7 +22,7 @@ if (params.help) {
     --project      File prefix for merged and annotated VCF files.
                    Default: 'variants'
     --width        The genomic window size per variant calling job.
-                   Default: 100000
+                   Default: 1000000
     --options      Arguments to be passed to freebayes command in addition
                    to those already supplied like `--bam`, `--region`, and
                    `--fasta-reference`. Single quote these when specifying
@@ -126,9 +126,9 @@ process run_freebayes {
     script:
     """
     freebayes \
+        --region ${interval} \
         --fasta-reference ${fasta} \
         ${params.options} \
-        --region ${interval} \
         ${aln.collect { "--bam $it" }.join(" ")} \
         | bgzip -c > ${params.project}_${interval.replaceAll(~/\:|\-|\*/, "_")}.vcf.gz
     bcftools index ${params.project}_${interval.replaceAll(~/\:|\-|\*/, "_")}.vcf.gz
