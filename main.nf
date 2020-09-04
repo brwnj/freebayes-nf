@@ -22,7 +22,7 @@ if (params.help) {
     --project      File prefix for merged and annotated VCF files.
                    Default: 'variants'
     --width        The genomic window size per variant calling job.
-                   Default: 1000000
+                   Default: 5000000
     --options      Arguments to be passed to freebayes command in addition
                    to those already supplied like `--bam`, `--region`, and
                    `--fasta-reference`. Single quote these when specifying
@@ -149,6 +149,7 @@ process make_vcf_list {
 
 process merge_vcfs {
     publishDir path: "${params.outdir}/freebayes"
+    cpus params.cpus.toInteger()
 
     input:
     file(vcf) from vcf_ch.collect()
@@ -163,7 +164,7 @@ process merge_vcfs {
 
     script:
     """
-    bcftools merge -m all --force-samples -l $vcftxt --threads 2 -O z -o ${params.project}_dirty.vcf.gz
+    gunzip -cd \$(cat $vcftxt) | vcffirstheader | bgzip -c > ${params.project}_dirty.vcf.gz
     gsort ${params.project}_dirty.vcf.gz $faidx | vcfuniq \
         | bgzip -c > ${params.project}_dirty_sorted.vcf.gz
     bcftools norm -c all -f $fasta --multiallelics - --threads ${task.cpus} \
